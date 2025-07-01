@@ -125,33 +125,42 @@
     background: #c12e2a;
   }
 
+  /* 手機版調整 */
   @media (max-width: 480px) {
-    /* 調整第二排 top-panel 欄位寬度 */
+    /* top-panel 第二排調整欄位寬度 */
     .top-panel:nth-of-type(2) {
-      /* 年/月/週約100px，新學生約50px，新增按鈕和人數區域自適應 */
-      grid-template-columns: 100px 100px 100px 50px 1fr auto;
-      gap: 4px;
+      /* 6欄 自訂寬度： 年/月/週各80px，新增學生45px，新增按鈕和學生數自動 */
+      grid-template-columns: 80px 80px 80px 45px 1fr auto;
     }
-    /* 同時調整這些欄位字型與內距 */
+    /* top-panel 第一排不變 */
+    .top-panel:nth-of-type(1) {
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    /* 選單、輸入框字體與內距調整 */
     #yearSelect, #monthSelect, #weekSelect {
       font-size: 14px;
       padding: 4px;
       text-align: center;
+      /* 確保寬度跟容器一致 */
+      width: 80px;
+      min-width: 80px;
+      max-width: 80px;
     }
     #studentInput {
       font-size: 12px;
       padding: 4px;
+      width: 45px;
+      min-width: 45px;
+      max-width: 45px;
       text-align: center;
     }
     #btnAddStudent {
       font-size: 13px;
-      padding: 6px 4px;
+      padding: 6px;
     }
-    #studentCount {
-      font-size: 13px;
-      white-space: nowrap;
-      padding-left: 4px;
-    }
+
+    /* 表格調整 */
     td.day-cell {
       width: 24px;
       height: 24px;
@@ -159,6 +168,7 @@
     td.sticky-name {
       width: 70px;
       max-width: 70px;
+      min-width: 70px;
     }
   }
 </style>
@@ -235,6 +245,10 @@ function initDatePanels() {
   const now = new Date();
   const y = now.getFullYear();
   const m = now.getMonth() + 1;
+
+  yearSelect.innerHTML = "";
+  monthSelect.innerHTML = "";
+  weekSelect.innerHTML = "";
 
   for(let i=y; i<=y+5; i++) yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
   for(let i=1;i<=12;i++){
