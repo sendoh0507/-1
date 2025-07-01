@@ -37,7 +37,8 @@
   }
   /* 第二排 top-panel: 調整欄位寬度 */
   .top-panel.bottom {
-    grid-template-columns: 75px 75px 75px 40px 1fr auto;
+    grid-template-columns: 73px 73px 73px 40px 1fr auto;
+    gap: 4px;
   }
 
   .top-panel input,
@@ -52,7 +53,7 @@
     color: #fff;
     text-align: center;
   }
-  /* input 和 select 寬度改成 100% 讓 grid 寬度控制 */
+  /* input 和 select 寬度100%由 grid 容器控制 */
   .top-panel input,
   .top-panel select {
     width: 100%;
@@ -144,7 +145,7 @@
       margin-bottom: 6px;
     }
     .top-panel.bottom {
-      grid-template-columns: 75px 75px 75px 40px 1fr auto;
+      grid-template-columns: 73px 73px 73px 40px 1fr auto;
     }
     #yearSelect, #monthSelect, #weekSelect {
       font-size: 14px;
@@ -239,18 +240,17 @@ function initDatePanels() {
   const y = now.getFullYear();
   const m = now.getMonth() + 1;
 
-  // 年份只顯示數字，不加「年」
   yearSelect.innerHTML = "";
   for(let i = y; i <= y + 5; i++) {
     yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
   }
-  // 月份只顯示數字（兩位數），不加「月」
+
   monthSelect.innerHTML = "";
   for(let i = 1; i <= 12; i++) {
     const v = i.toString().padStart(2, "0");
     monthSelect.innerHTML += `<option value="${v}">${v}</option>`;
   }
-  // 週只顯示「一、二、三、四、五」
+
   weekSelect.innerHTML = "";
   const weekLabels = ["一","二","三","四","五"];
   for(let i = 1; i <= 5; i++) {
@@ -259,25 +259,22 @@ function initDatePanels() {
 
   yearSelect.value = y;
   monthSelect.value = m.toString().padStart(2, "0");
-  // 計算當前週數（針對週選單）
+
   const firstDay = new Date(y, m - 1, 1).getDay();
   const offset = firstDay === 0 ? 6 : firstDay - 1;
   const currentWeek = Math.min(5, Math.floor((now.getDate() + offset - 1) / 7) + 1);
   weekSelect.value = currentWeek;
 }
 
-// 載入與顯示學校列表及資料
 function refreshUI() {
   schoolSelect.innerHTML = Object.keys(data.schools).map(school => `<option value="${school}">${school}</option>`).join("");
   schoolSelect.value = data.currentSchool;
   const info = data.schools[data.currentSchool];
   courseInput.value = info.course || "";
-  // 老師欄位去除尾巴「老師」字樣
   teacherInput.value = info.teacher ? info.teacher.replace(/老師$/, "") : "";
   titleHeader.textContent = `📚 ${data.currentSchool} (${info.course}) 點名版 📚`;
 }
 
-// 取得該週的每日日期，週日為最後一天
 function getWeekDates(y, m, w) {
   const firstDay = new Date(y, m - 1, 1).getDay();
   const offset = firstDay === 0 ? 6 : firstDay - 1;
@@ -291,7 +288,6 @@ function getWeekDates(y, m, w) {
   return dates;
 }
 
-// 繪製點名表
 function renderTable() {
   const info = data.schools[data.currentSchool];
   const y = +yearSelect.value;
@@ -316,7 +312,6 @@ function renderTable() {
       }).join("") +
       `<td class="delete-cell"><button>刪除</button></td>`;
 
-    // 點擊打勾切換
     const dayCells = tr.querySelectorAll(".day-cell");
     dayCells.forEach((td, i) => {
       td.onclick = () => {
@@ -328,7 +323,6 @@ function renderTable() {
       };
     });
 
-    // 刪除學生
     tr.querySelector("button").onclick = () => {
       if (confirm(`刪除學生：${name}?`)) {
         info.students = info.students.filter(n => n !== name);
@@ -369,7 +363,7 @@ btnDelSchool.onclick = () => {
   }
 };
 
-// 設定課程及老師（老師欄位會加上「老師」字尾）
+// 設定課程及老師
 btnSetCourse.onclick = () => {
   const info = data.schools[data.currentSchool];
   info.course = courseInput.value;
@@ -379,7 +373,7 @@ btnSetCourse.onclick = () => {
   alert("設定完成");
 };
 
-// 切換學校時，載入該校資料
+// 切換學校時更新畫面及資料
 schoolSelect.onchange = () => {
   data.currentSchool = schoolSelect.value;
   saveData();
@@ -387,7 +381,7 @@ schoolSelect.onchange = () => {
   renderTable();
 };
 
-// 老師輸入框改變時自動保存並更新data
+// 老師輸入即時保存
 teacherInput.addEventListener("input", () => {
   const info = data.schools[data.currentSchool];
   info.teacher = teacherInput.value.trim() + "老師";
@@ -413,7 +407,6 @@ btnAddStudent.onclick = () => {
 // 年/月/週改變重繪表格
 yearSelect.onchange = monthSelect.onchange = weekSelect.onchange = renderTable;
 
-// 初始化元件
 initDatePanels();
 refreshUI();
 renderTable();
