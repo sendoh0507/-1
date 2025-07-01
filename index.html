@@ -1,569 +1,381 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>📚 OO學校 (課程) 點名版 📚</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-      display: flex;
-      justify-content: center;
-      background: #f0f0f0;
-      margin: 0;
-    }
-    .container {
-      width: 100%;
-      max-width: 480px;
-      background: white;
-      padding: 12px 16px 20px 16px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      border-radius: 8px;
-    }
-    h2 {
-      text-align: center;
-      font-size: 24px;
-      margin-bottom: 12px;
-      user-select: none;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>📚 OO學校 點名版 📚</title>
+<style>
+  /* 整體背景與容器 */
+  body {
+    font-family: Arial, sans-serif;
+    background: #1e1e1e;
+    margin: 0;
+    padding: 6px;
+    display: flex;
+    justify-content: center;
+  }
+  .container {
+    width: 100%;
+    max-width: 480px;
+    background: #2c2c2c;
+    border-radius: 8px;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+  h2 {
+    text-align: center;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    color: #fff;
+    line-height: 1.2;
+    user-select: none;
+  }
+  /* 上方面板 */
+  .top-panel {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .top-panel input,
+  .top-panel select,
+  .top-panel button {
+    font-size: 13px;
+    padding: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: none;
+    background: #3a3a3a;
+    color: #fff;
+  }
+  .top-panel button {
+    background: #4a90e2;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .top-panel button:hover {
+    background: #357abd;
+  }
+  #teacherInput {
+    text-align: center;
+  }
+  #courseInput {
+    text-align: center;
+  }
+  #studentCount {
+    grid-column: 6 / 7;
+    justify-self: end;
+    font-size: 13px;
+    color: #fff;
+    white-space: nowrap;
+  }
+  /* 表格 */
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #2c2c2c;
+  }
+  th, td {
+    border: 1px solid #444;
+    padding: 6px 4px;
+    text-align: center;
+    color: #eee;
+    font-size: 13px;
+  }
+  th {
+    background: #3a3a3a;
+  }
+  /* 固定姓名欄 */
+  td.sticky-name {
+    position: sticky;
+    left: 0;
+    background: #2c2c2c;
+    font-weight: bold;
+    min-width: 100px;
+    max-width: 120px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* 點名格 */
+  td.day-cell {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  td.day-cell.signed {
+    background: #81c784;
+    color: #000;
+    font-weight: bold;
+  }
+  td.day-cell:hover {
+    background: #5a875a;
+  }
+  /* 刪除按鈕 */
+  td.delete-cell button {
+    background: #d9534f;
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+  }
+  td.delete-cell button:hover {
+    background: #c12e2a;
+  }
+  @media (max-width: 480px) {
     .top-panel {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 6px;
-      margin-bottom: 8px;
-      align-items: center;
+      grid-template-columns: repeat(3, 1fr);
     }
-    .top-panel input,
-    .top-panel select,
-    .top-panel button {
-      font-size: 14px;
-      padding: 6px 8px;
-      width: 100%;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .top-panel input:focus,
-    .top-panel select:focus,
-    .top-panel button:focus {
-      outline: none;
-      border-color: #4a90e2;
-      box-shadow: 0 0 4px #4a90e2;
-    }
-    .top-panel button {
-      cursor: pointer;
-      background-color: #4a90e2;
-      color: white;
-      border: none;
-      transition: background-color 0.3s ease;
-    }
-    .top-panel button:hover {
-      background-color: #357abd;
-    }
-    #teacherInput {
-      border-radius: 4px;
-    }
-    #studentCount {
-      grid-column: 6 / 7;
-      text-align: right;
-      font-weight: 600;
-      font-size: 14px;
-      user-select: none;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      table-layout: fixed;
-      user-select: none;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px 4px;
-      text-align: center;
-      white-space: nowrap;
-    }
-    th {
-      background-color: #e0e0e0;
-      font-weight: 600;
-    }
-    /* 固定學生姓名欄 */
-    td.sticky-name {
-      position: sticky;
-      left: 0;
-      background: #fafafa;
-      font-weight: 600;
-      z-index: 2;
-      width: 120px;
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    /* 點名格 */
     td.day-cell {
-      cursor: pointer;
-      user-select: none;
-      width: 30px;
-      height: 30px;
-      border-radius: 4px;
-      transition: background-color 0.2s ease;
+      width: 24px;
+      height: 24px;
     }
-    td.day-cell.signed {
-      background-color: #b2f2bb;
-      color: #1a5e19;
-      font-weight: bold;
-    }
-    td.day-cell:hover {
-      background-color: #d2f0d8;
-    }
-    /* 刪除按鈕 */
-    td.delete-cell button {
-      padding: 4px 6px;
-      font-size: 12px;
-      background-color: #f44336;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 3px;
-      user-select: none;
-    }
-    td.delete-cell button:hover {
-      background-color: #c13024;
-    }
-    /* 手機調整 */
-    @media (max-width: 480px) {
-      .top-panel {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-      }
-      td.sticky-name {
-        width: 100px;
-        font-size: 13px;
-      }
-      td.day-cell {
-        width: 26px;
-        height: 26px;
-        font-size: 12px;
-      }
-      h2 {
-        font-size: 20px;
-      }
-      .top-panel input,
-      .top-panel select,
-      .top-panel button {
-        font-size: 13px;
-        padding: 5px 6px;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2 id="titleHeader">📚 OO學校 (課程) 點名版 📚</h2>
+<div class="container">
+  <h2 id="titleHeader">📚 OO學校 (課程) 點名版 📚</h2>
 
-    <!-- 第一排 -->
-    <div class="top-panel" style="margin-bottom:10px;">
-      <select id="schoolSelect" title="選擇學校"></select>
-      <button id="btnAddSchool" title="新增學校">新增學校</button>
-      <button id="btnDelSchool" title="刪除學校">刪除學校</button>
-      <input id="courseInput" type="text" placeholder="課程名稱" title="輸入課程名稱" />
-      <button id="btnSetCourse" title="設定課程">設定課程</button>
-      <input id="teacherInput" type="text" placeholder="老師" title="輸入老師名稱" />
-    </div>
-
-    <!-- 第二排 -->
-    <div class="top-panel" style="margin-bottom:12px;">
-      <select id="yearSelect" title="選擇年份"></select>
-      <select id="monthSelect" title="選擇月份"></select>
-      <select id="weekSelect" title="選擇週次"></select>
-      <input id="studentInput" type="text" placeholder="新增學生" title="輸入學生姓名" />
-      <button id="btnAddStudent" title="新增學生">新增</button>
-      <div id="studentCount">👥 共 0 位學生</div>
-    </div>
-
-    <!-- 點名表 -->
-    <table>
-      <thead>
-        <tr>
-          <th>學生姓名</th>
-          <th id="d1">一<br>-</th>
-          <th id="d2">二<br>-</th>
-          <th id="d3">三<br>-</th>
-          <th id="d4">四<br>-</th>
-          <th id="d5">五<br>-</th>
-          <th id="d6">六<br>-</th>
-          <th id="d7">日<br>-</th>
-          <th>刪除</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
+  <div class="top-panel">
+    <select id="schoolSelect"></select>
+    <button id="btnAddSchool">新增學校</button>
+    <button id="btnDelSchool">刪除學校</button>
+    <input id="courseInput" type="text" placeholder="課程名稱" />
+    <button id="btnSetCourse">設定課程</button>
+    <input id="teacherInput" type="text" placeholder="老師" />
   </div>
 
-  <script>
-    // 變數初始化
-    const schoolSelect = document.getElementById("schoolSelect");
-    const btnAddSchool = document.getElementById("btnAddSchool");
-    const btnDelSchool = document.getElementById("btnDelSchool");
-    const courseInput = document.getElementById("courseInput");
-    const btnSetCourse = document.getElementById("btnSetCourse");
-    const teacherInput = document.getElementById("teacherInput");
-    const yearSelect = document.getElementById("yearSelect");
-    const monthSelect = document.getElementById("monthSelect");
-    const weekSelect = document.getElementById("weekSelect");
-    const studentInput = document.getElementById("studentInput");
-    const btnAddStudent = document.getElementById("btnAddStudent");
-    const studentCount = document.getElementById("studentCount");
-    const tableBody = document.getElementById("tableBody");
-    const titleHeader = document.getElementById("titleHeader");
+  <div class="top-panel">
+    <select id="yearSelect"></select>
+    <select id="monthSelect"></select>
+    <select id="weekSelect"></select>
+    <input id="studentInput" type="text" placeholder="新增學生" />
+    <button id="btnAddStudent">新增</button>
+    <div id="studentCount">👥 共 0 位學生</div>
+  </div>
 
-    // 本地存儲 key
-    const STORAGE_KEY = "attendanceData";
+  <div class="table-wrap">
+    <table><thead><tr>
+      <th>學生姓名</th>
+      <th id="d1">一<br>-</th><th id="d2">二<br>-</th>
+      <th id="d3">三<br>-</th><th id="d4">四<br>-</th>
+      <th id="d5">五<br>-</th><th id="d6">六<br>-</th>
+      <th id="d7">日<br>-</th><th>刪除</th>
+    </tr></thead><tbody id="tableBody"></tbody></table>
+  </div>
+</div>
 
-    // 資料結構
-    // {
-    //   schools: {
-    //     "OO學校": {
-    //       course: "課程名",
-    //       teacher: "老師名",
-    //       students: ["學生1", "學生2", ...],
-    //       attendance: {
-    //         "YYYY-MM-W": {
-    //           "學生1": [false, true, false, ...], // 7 天點名狀態 (周一=0,...周日=6)
-    //           ...
-    //         }
-    //       }
-    //     }
-    //   },
-    //   currentSchool: "OO學校"
-    // }
+<script>
+// 本地存儲 key
+const STORAGE_KEY = "attendanceData";
 
-    let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-      schools: {
-        "OO學校": {
-          course: "課程",
-          teacher: "",
-          students: [],
-          attendance: {}
-        }
-      },
-      currentSchool: "OO學校"
+// 取得 DOM
+const schoolSelect = document.getElementById("schoolSelect");
+const btnAddSchool = document.getElementById("btnAddSchool");
+const btnDelSchool = document.getElementById("btnDelSchool");
+const courseInput = document.getElementById("courseInput");
+const btnSetCourse = document.getElementById("btnSetCourse");
+const teacherInput = document.getElementById("teacherInput");
+const yearSelect = document.getElementById("yearSelect");
+const monthSelect = document.getElementById("monthSelect");
+const weekSelect = document.getElementById("weekSelect");
+const studentInput = document.getElementById("studentInput");
+const btnAddStudent = document.getElementById("btnAddStudent");
+const studentCount = document.getElementById("studentCount");
+const tableBody = document.getElementById("tableBody");
+const titleHeader = document.getElementById("titleHeader");
+
+// 初始資料
+let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+  schools: { "OO學校": { course:"課程", teacher:"", students:[], attendance:{} } },
+  currentSchool: "OO學校"
+};
+
+// 存資料
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// 元件初始化
+function initDatePanels() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+
+  yearSelect.innerHTML = "";
+  for(let i=y; i<=y+5; i++){
+    yearSelect.innerHTML += `<option value="${i}">${i} 年</option>`;
+  }
+  monthSelect.innerHTML = "";
+  for(let i=1;i<=12;i++){
+    const v=i.toString().padStart(2,'0');
+    monthSelect.innerHTML += `<option value="${v}">${i} 月</option>`;
+  }
+  weekSelect.innerHTML = "";
+  for(let i=1;i<=5;i++){
+    weekSelect.innerHTML += `<option value="${i}">第 ${i} 週</option>`;
+  }
+
+  yearSelect.value = y;
+  monthSelect.value = m.toString().padStart(2,'0');
+
+  // 預設週次 = 今日週次（週一為起）
+  const first = new Date(y, m-1, 1).getDay();
+  const offset = first===0?6:first-1;
+  const w = Math.min(5, Math.floor((now.getDate()+offset-1)/7)+1);
+  weekSelect.value = w;
+}
+
+// 更新學校選單與標題
+function refreshUI(){
+  schoolSelect.innerHTML = "";
+  for(const name of Object.keys(data.schools)){
+    schoolSelect.innerHTML += `<option value="${name}">${name}</option>`;
+  }
+  schoolSelect.value = data.currentSchool;
+
+  const info = data.schools[data.currentSchool];
+  courseInput.value = info.course;
+  teacherInput.value = info.teacher;
+  titleHeader.textContent = `📚 ${data.currentSchool} (${info.course}) 點名版 📚`;
+}
+
+// 算每週日期
+function getWeekDates(y, m, w){
+  const first = new Date(y, m-1,1).getDay();
+  const offset = first===0?6:first-1;
+  const start = 1 + (w-1)*7 - offset;
+  const days = new Date(y, m, 0).getDate();
+  let arr=[];
+  for(let i=0;i<7;i++){
+    const d = start+i;
+    arr.push(d<1||d>days ? "-" : d);
+  }
+  return arr;
+}
+
+// 渲染點名與格
+function renderTable(){
+  const info = data.schools[data.currentSchool];
+  const y = +yearSelect.value;
+  const m = +monthSelect.value;
+  const w = +weekSelect.value;
+
+  const dates = getWeekDates(y, m, w);
+  for(let i=1;i<=7;i++){
+    document.getElementById("d"+i).innerHTML = ["一","二","三","四","五","六","日"][i-1] + "<br>" + dates[i-1];
+  }
+
+  const key = `${yearSelect.value}-${monthSelect.value}-${weekSelect.value}`;
+  const att = info.attendance[key] || {};
+
+  tableBody.innerHTML = "";
+  info.students.forEach(name=>{
+    const tr = document.createElement("tr");
+    const tdName = document.createElement("td");
+    tdName.className="sticky-name";
+    tdName.textContent = name;
+    tr.appendChild(tdName);
+
+    for(let i=0;i<7;i++){
+      const td = document.createElement("td");
+      td.className="day-cell";
+      td.textContent = att[name]?.[i]? "✔️": "";
+      if(att[name]?.[i]) td.classList.add("signed");
+      td.onclick = ()=>{
+        data.schools[data.currentSchool].attendance[key] = att;
+        if(!att[name]) att[name]=[false,false,false,false,false,false,false];
+        att[name][i] = !att[name][i];
+        saveData();
+        renderTable();
+      };
+      tr.appendChild(td);
+    }
+
+    const tdDel = document.createElement("td");
+    tdDel.className="delete-cell";
+    const btn = document.createElement("button");
+    btn.textContent="刪除";
+    btn.onclick = ()=>{
+      if(confirm(`刪除學生：${name}?`)){
+        const idx = info.students.indexOf(name);
+        info.students.splice(idx,1);
+        saveData();
+        renderTable();
+      }
     };
+    tdDel.appendChild(btn);
+    tr.appendChild(tdDel);
 
-    // 工具：存資料
-    function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
+    tableBody.appendChild(tr);
+  });
 
-    // 初始化年份選項（從今年開始，往後5年）
-    function initYearOptions() {
-      const nowYear = new Date().getFullYear();
-      yearSelect.innerHTML = "";
-      for (let y = nowYear; y <= nowYear + 5; y++) {
-        let opt = document.createElement("option");
-        opt.value = y;
-        opt.textContent = y + " 年";
-        yearSelect.appendChild(opt);
-      }
-    }
+  studentCount.textContent = `👥 共 ${info.students.length} 位學生`;
+}
 
-    // 初始化月份選項
-    function initMonthOptions() {
-      monthSelect.innerHTML = "";
-      for (let m = 1; m <= 12; m++) {
-        let opt = document.createElement("option");
-        opt.value = m.toString().padStart(2, "0");
-        opt.textContent = m + " 月";
-        monthSelect.appendChild(opt);
-      }
-    }
+// 新增學校
+btnAddSchool.onclick = ()=>{
+  const n=prompt("新學校名稱:");
+  if(n && !data.schools[n]){
+    data.schools[n]={course:"課程",teacher:"",students:[],attendance:{}};
+    data.currentSchool=n;
+    saveData(); refreshUI(); renderTable();
+  }
+};
 
-    // 初始化週次選項 (1~5週)
-    function initWeekOptions() {
-      weekSelect.innerHTML = "";
-      for (let w = 1; w <= 5; w++) {
-        let opt = document.createElement("option");
-        opt.value = w;
-        opt.textContent = "第 " + w + " 週";
-        weekSelect.appendChild(opt);
-      }
-    }
+// 刪除學校
+btnDelSchool.onclick = ()=>{
+  if(data.currentSchool!=="OO學校"
+     && confirm(`刪除學校「${data.currentSchool}」?`)){
+    delete data.schools[data.currentSchool];
+    data.currentSchool = Object.keys(data.schools)[0];
+    saveData(); refreshUI(); renderTable();
+  }
+};
 
-    // 依選定年月週回傳 key: YYYY-MM-W
-    function getSelectedKey() {
-      return `${yearSelect.value}-${monthSelect.value}-${weekSelect.value}`;
-    }
+// 設定課程與老師
+btnSetCourse.onclick = ()=>{
+  const info = data.schools[data.currentSchool];
+  info.course = courseInput.value;
+  info.teacher = teacherInput.value + "老師";
+  saveData(); refreshUI(); alert("設定完成");
+};
 
-    // 計算該年月第幾週的日期（周一～周日）
-    // 回傳陣列：7 個日期號碼或 '-' 字串
-    function calcWeekDates(year, month, week) {
-      // 週一為該週起始日（根據月初周一算起）
-      // 1. 找該年月1日星期幾
-      const firstDate = new Date(year, month - 1, 1);
-      const firstDay = firstDate.getDay(); // 0日...6六
-      // 週一為1，周日為0，JS週日是0，需要調整為週一是0
-      // 我們將週一當作0，週日當作6，轉換:
-      const offset = (firstDay === 0) ? 6 : firstDay - 1;
-      // 該週起始日號碼
-      let startDay = 1 + (week - 1) * 7 - offset;
-      let dates = [];
-      for (let i = 0; i < 7; i++) {
-        let d = startDay + i;
-        if (d < 1 || d > daysInMonth(year, month)) {
-          dates.push("-");
-        } else {
-          dates.push(d);
-        }
-      }
-      return dates;
-    }
+// 切換學校
+schoolSelect.onchange = ()=>{
+  data.currentSchool = schoolSelect.value;
+  saveData(); refreshUI(); renderTable();
+};
 
-    // 月份天數
-    function daysInMonth(year, month) {
-      return new Date(year, month, 0).getDate();
-    }
+// 新增學生
+btnAddStudent.onclick = ()=>{
+  const v=studentInput.value.trim();
+  if(v){
+    const s = data.schools[data.currentSchool].students;
+    if(!s.includes(v)){
+      s.push(v);
+      saveData(); renderTable();
+      studentInput.value="";
+    } else alert("學生已存在");
+  }
+};
 
-    // 更新上方標題
-    function updateTitle() {
-      const school = data.currentSchool;
-      const course = data.schools[school]?.course || "";
-      titleHeader.textContent = `📚 ${school} (${course}) 點名版 📚`;
-      // 同步輸入框
-      courseInput.value = course;
-      teacherInput.value = data.schools[school]?.teacher || "";
-    }
+// 日期控制變更刷新
+yearSelect.onchange = monthSelect.onchange = weekSelect.onchange = renderTable;
 
-    // 更新學校下拉選項
-    function updateSchoolOptions() {
-      schoolSelect.innerHTML = "";
-      for (const s of Object.keys(data.schools)) {
-        let opt = document.createElement("option");
-        opt.value = s;
-        opt.textContent = s;
-        schoolSelect.appendChild(opt);
-      }
-      schoolSelect.value = data.currentSchool;
-    }
-
-    // 更新年月週選項（設定預設為今天所在的年、月、週）
-    function updateDateSelections() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      // 預設年份與月份
-      if (!yearSelect.value) yearSelect.value = year;
-      if (!monthSelect.value) monthSelect.value = month.toString().padStart(2, "0");
-
-      // 計算週次
-      // 用當月第一天星期一為基準，算當前日期是第幾週
-      const day = now.getDate();
-      const firstDate = new Date(year, month - 1, 1);
-      const firstDay = firstDate.getDay();
-      const offset = (firstDay === 0) ? 6 : firstDay - 1;
-      let currentWeek = Math.floor((day + offset - 1) / 7) + 1;
-      currentWeek = currentWeek > 5 ? 5 : currentWeek; // 最多五週
-      if (!weekSelect.value) weekSelect.value = currentWeek;
-    }
-
-    // 渲染上方日期標題(周一~周日) 與 日數
-    function renderDateHeaders() {
-      const year = parseInt(yearSelect.value);
-      const month = parseInt(monthSelect.value);
-      const week = parseInt(weekSelect.value);
-      const dates = calcWeekDates(year, month, week);
-      for (let i = 1; i <= 7; i++) {
-        const th = document.getElementById("d" + i);
-        th.innerHTML = `${["一","二","三","四","五","六","日"][i-1]}<br>${dates[i-1]}`;
-      }
-    }
-
-    // 渲染學生表格
-    function renderTable() {
-      const school = data.currentSchool;
-      const schoolData = data.schools[school];
-      if (!schoolData) return;
-      renderDateHeaders();
-
-      const key = getSelectedKey();
-
-      const attendance = schoolData.attendance[key] || {};
-      const students = schoolData.students;
-
-      studentCount.textContent = `👥 共 ${students.length} 位學生`;
-      tableBody.innerHTML = "";
-
-      students.forEach((name, idx) => {
-        const tr = document.createElement("tr");
-
-        // 學生姓名欄(固定)
-        const tdName = document.createElement("td");
-        tdName.textContent = name;
-        tdName.classList.add("sticky-name");
-        tr.appendChild(tdName);
-
-        // 7 天點名格
-        for(let i=0; i<7; i++) {
-          const td = document.createElement("td");
-          td.classList.add("day-cell");
-
-          const signed = attendance[name]?.[i] || false;
-          if(signed) td.classList.add("signed");
-
-          td.addEventListener("click", () => {
-            toggleAttendance(name, i);
-          });
-          td.textContent = signed ? "✔️" : "";
-          tr.appendChild(td);
-        }
-
-        // 刪除學生欄位
-        const tdDel = document.createElement("td");
-        tdDel.classList.add("delete-cell");
-        const delBtn = document.createElement("button");
-        delBtn.textContent = "刪除";
-        delBtn.title = "刪除學生";
-        delBtn.addEventListener("click", () => {
-          if(confirm(`確定要刪除學生「${name}」嗎？`)) {
-            deleteStudent(name);
-          }
-        });
-        tdDel.appendChild(delBtn);
-        tr.appendChild(tdDel);
-
-        tableBody.appendChild(tr);
-      });
-    }
-
-    // 切換學校
-    function changeSchool(newSchool) {
-      if (!data.schools[newSchool]) return;
-      data.currentSchool = newSchool;
-      saveData();
-      updateTitle();
-      updateSchoolOptions();
-      renderTable();
-    }
-
-    // 新增學校
-    function addSchool() {
-      const schoolName = prompt("請輸入新學校名稱：");
-      if (!schoolName) return alert("學校名稱不可空白");
-      if (data.schools[schoolName]) return alert("該學校已存在");
-      data.schools[schoolName] = { course: "", teacher: "", students: [], attendance: {} };
-      data.currentSchool = schoolName;
-      saveData();
-      updateSchoolOptions();
-      updateTitle();
-      renderTable();
-    }
-
-    // 刪除學校
-    function deleteSchool() {
-      const schoolName = data.currentSchool;
-      if (schoolName === "OO學校") return alert("不可刪除預設學校");
-      if (confirm(`確定刪除學校「${schoolName}」及所有資料？`)) {
-        delete data.schools[schoolName];
-        data.currentSchool = Object.keys(data.schools)[0] || "OO學校";
-        saveData();
-        updateSchoolOptions();
-        updateTitle();
-        renderTable();
-      }
-    }
-
-    // 設定課程
-    function setCourse() {
-      const school = data.currentSchool;
-      data.schools[school].course = courseInput.value.trim();
-      data.schools[school].teacher = teacherInput.value.trim();
-      saveData();
-      updateTitle();
-      alert("課程與老師已設定");
-    }
-
-    // 新增學生
-    function addStudent() {
-      const name = studentInput.value.trim();
-      if (!name) return alert("請輸入學生姓名");
-      const school = data.currentSchool;
-      if (data.schools[school].students.includes(name)) return alert("學生已存在");
-      data.schools[school].students.push(name);
-      saveData();
-      studentInput.value = "";
-      renderTable();
-    }
-
-    // 刪除學生
-    function deleteStudent(name) {
-      const school = data.currentSchool;
-      const idx = data.schools[school].students.indexOf(name);
-      if (idx !== -1) {
-        data.schools[school].students.splice(idx, 1);
-        // 同時移除該學生的點名資料
-        for (const key in data.schools[school].attendance) {
-          delete data.schools[school].attendance[key][name];
-        }
-        saveData();
-        renderTable();
-      }
-    }
-
-    // 點名狀態切換
-    function toggleAttendance(studentName, dayIndex) {
-      const school = data.currentSchool;
-      const key = getSelectedKey();
-      if (!data.schools[school].attendance[key]) {
-        data.schools[school].attendance[key] = {};
-      }
-      if (!data.schools[school].attendance[key][studentName]) {
-        data.schools[school].attendance[key][studentName] = [false,false,false,false,false,false,false];
-      }
-      const current = data.schools[school].attendance[key][studentName][dayIndex];
-      data.schools[school].attendance[key][studentName][dayIndex] = !current;
-      saveData();
-      renderTable();
-    }
-
-    // 事件綁定
-    btnAddSchool.addEventListener("click", addSchool);
-    btnDelSchool.addEventListener("click", deleteSchool);
-    btnSetCourse.addEventListener("click", setCourse);
-    btnAddStudent.addEventListener("click", addStudent);
-
-    schoolSelect.addEventListener("change", e => {
-      changeSchool(e.target.value);
-    });
-
-    yearSelect.addEventListener("change", () => {
-      renderTable();
-    });
-    monthSelect.addEventListener("change", () => {
-      renderTable();
-    });
-    weekSelect.addEventListener("change", () => {
-      renderTable();
-    });
-
-    teacherInput.addEventListener("change", () => {
-      const school = data.currentSchool;
-      data.schools[school].teacher = teacherInput.value.trim();
-      saveData();
-      updateTitle();
-    });
-
-    // 初始化頁面
-    function init() {
-      updateSchoolOptions();
-      updateTitle();
-      initYearOptions();
-      initMonthOptions();
-      initWeekOptions();
-      updateDateSelections();
-      renderTable();
-    }
-
-    init();
-  </script>
+// 初始化
+initDatePanels();
+refreshUI();
+renderTable();
+</script>
 </body>
 </html>
