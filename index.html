@@ -2,304 +2,530 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>📚 OO學校 點名版 📚</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: url('https://i.imgur.com/N4gA9kR.jpg') no-repeat center center fixed;
-      background-size: cover;
+      margin: 0; padding: 0;
+      background: #222;
       color: #fff;
     }
     .container {
       max-width: 1200px;
-      margin: 0 auto;
+      margin: 20px auto;
       padding: 20px;
-      background: rgba(0, 0, 0, 0.7);
+      background: #333;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 0 15px #000;
     }
     h1 {
       text-align: center;
       margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 28px;
+      user-select: none;
     }
-    .controls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .student-controls {
+    .row-2, .row-3 {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      align-items: center;
+      margin-bottom: 15px;
       justify-content: flex-start;
-      margin-bottom: 20px;
+      align-items: center;
     }
-    input, select, button {
-      padding: 8px;
+    .row-2 > *, .row-3 > * {
+      flex-shrink: 0;
       font-size: 16px;
+    }
+    select, input[type=text], button {
+      padding: 8px 12px;
       border-radius: 6px;
       border: none;
+      background: #555;
+      color: #eee;
+      font-size: 16px;
+      min-width: 120px;
     }
-    select, input {
-      background: #1e1e1e;
-      color: #fff;
+    input[type=text] {
+      min-width: 160px;
     }
     button {
-      background: #4caf50;
-      color: #fff;
       cursor: pointer;
+      background: #4caf50;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #45a049;
     }
     button.danger {
       background: #f44336;
+    }
+    button.danger:hover {
+      background: #d32f2f;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       overflow-x: auto;
+      table-layout: fixed;
     }
-    th, td {
-      border: 1px solid #555;
-      padding: 8px;
+    thead tr th {
+      position: sticky;
+      top: 0;
+      background: #222;
+      padding: 10px 6px;
+      border: 1px solid #444;
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+      z-index: 2;
       text-align: center;
+    }
+    tbody tr td {
+      padding: 8px 6px;
+      border: 1px solid #444;
+      font-size: 14px;
+      white-space: nowrap;
+      text-align: center;
+      cursor: default;
       min-width: 80px;
     }
-    th {
-      background: #2a2d2e;
+    tbody tr td.sticky-name {
+      position: sticky;
+      left: 0;
+      background: #333;
+      font-weight: 600;
+      text-align: left;
+      padding-left: 10px;
+      cursor: default;
+      min-width: 160px;
+      z-index: 1;
+      user-select: none;
     }
-    td.day-cell {
+    tbody tr td.day-cell {
+      background: #444;
       cursor: pointer;
-      background: #424242;
+      transition: background 0.3s ease;
+      user-select: none;
     }
-    td.day-cell.signed {
+    tbody tr td.day-cell.signed {
       background: #81c784;
-      font-weight: bold;
       color: #000;
+      font-weight: 700;
+    }
+    tbody tr td.delete-cell button {
+      background: #f44336;
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    tbody tr td.delete-cell button:hover {
+      background: #d32f2f;
+    }
+    .student-count {
+      margin-left: auto;
+      font-weight: 600;
+      user-select: none;
     }
     @media (max-width: 768px) {
-      .controls {
-        display: flex;
-        flex-direction: column;
-      }
-      table {
-        display: block;
-        overflow-x: auto;
-      }
-      .student-controls {
+      .row-2, .row-3 {
         flex-direction: column;
         align-items: flex-start;
+      }
+      select, input[type=text], button {
+        min-width: 100%;
+      }
+      tbody tr td.sticky-name {
+        min-width: 140px;
+        padding-left: 6px;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📚 <span id="titleSchool">OO學校</span> <span id="titleCourse">(課程)</span> 點名版 📚</h1>
-    <div class="controls">
-      <select id="schoolSelect" onchange="updateTitle(); loadData();"></select>
-      <button onclick="addSchool()">新增學校</button>
-      <button onclick="deleteSchool()" class="danger">刪除學校</button>
-      <input type="text" id="courseInput" placeholder="請輸入課程名稱">
-      <button onclick="setCourse()">設定課程</button>
-      <select id="yearSelect"></select>
-      <select id="monthSelect"></select>
-      <select id="weekSelect"></select>
+    <h1>
+      📚 <span id="titleSchool">OO學校</span> 
+      <span id="titleCourse">(課程)</span> 
+      <span id="titleTeacher">(指導老師)</span> 
+      點名版 📚
+    </h1>
+
+    <div class="row-2">
+      <select id="schoolSelect" title="切換學校"></select>
+      <button id="btnAddSchool" type="button">新增學校</button>
+      <button id="btnDelSchool" type="button" class="danger">刪除學校</button>
+      <input id="courseInput" type="text" placeholder="請輸入課程名稱" title="課程名稱" />
+      <button id="btnSetCourse" type="button">設定課程</button>
+      <input id="teacherInput" type="text" placeholder="請輸入指導老師姓名" title="指導老師姓名" />
+      <button id="btnSetTeacher" type="button">設定指導老師</button>
     </div>
-    <div class="student-controls">
-      <input type="text" id="studentInput" placeholder="輸入新學生">
-      <button onclick="addStudent()">新增學生</button>
-      <div id="courseDisplay">📘 課程：<span id="currentCourse">尚未設定</span></div>
-      <div id="studentCount">👥 共 0 位學生</div>
+
+    <div class="row-3">
+      <select id="yearSelect" title="選擇年份"></select>
+      <select id="monthSelect" title="選擇月份"></select>
+      <select id="weekSelect" title="選擇週次"></select>
+      <input id="studentInput" type="text" placeholder="輸入新學生" title="新增學生" />
+      <button id="btnAddStudent" type="button">新增學生</button>
+      <div class="student-count" id="studentCount">👥 共 0 位學生</div>
     </div>
-    <table>
+
+    <table id="attendanceTable">
       <thead>
         <tr>
           <th>姓名</th>
-          <th class="date-header">週一<br><span id="d1">-</span></th>
-          <th class="date-header">週二<br><span id="d2">-</span></th>
-          <th class="date-header">週三<br><span id="d3">-</span></th>
-          <th class="date-header">週四<br><span id="d4">-</span></th>
-          <th class="date-header">週五<br><span id="d5">-</span></th>
-          <th class="date-header">週六<br><span id="d6">-</span></th>
-          <th class="date-header">週日<br><span id="d7">-</span></th>
+          <th>週一<br><span id="d1">-</span></th>
+          <th>週二<br><span id="d2">-</span></th>
+          <th>週三<br><span id="d3">-</span></th>
+          <th>週四<br><span id="d4">-</span></th>
+          <th>週五<br><span id="d5">-</span></th>
+          <th>週六<br><span id="d6">-</span></th>
+          <th>週日<br><span id="d7">-</span></th>
           <th>刪除</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
   </div>
-  <script>
-    const schoolSelect = document.getElementById('schoolSelect');
-    const titleSchool = document.getElementById('titleSchool');
-    const titleCourse = document.getElementById('titleCourse');
-    const yearSelect = document.getElementById('yearSelect');
-    const monthSelect = document.getElementById('monthSelect');
-    const weekSelect = document.getElementById('weekSelect');
-    const tableBody = document.getElementById('tableBody');
 
-    function init() {
-      // 初始化下拉選單
-      const now = new Date();
-      for (let y = now.getFullYear(); y <= now.getFullYear() + 5; y++) {
-        const opt = document.createElement("option");
-        opt.value = y;
-        opt.text = y + " 年";
-        yearSelect.appendChild(opt);
-      }
-      yearSelect.value = now.getFullYear();
+<script>
+  // 主要資料存放，localStorage鍵名
+  const STORAGE_KEY = 'attendanceData_v1';
 
-      for (let i = 1; i <= 12; i++) {
-        const opt = document.createElement("option");
-        opt.value = String(i).padStart(2, "0");
-        opt.text = i + " 月";
-        monthSelect.appendChild(opt);
-      }
-      monthSelect.value = String(now.getMonth() + 1).padStart(2, "0");
-
-      for (let i = 1; i <= 5; i++) {
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.text = "第 " + i + " 週";
-        weekSelect.appendChild(opt);
-      }
-      weekSelect.value = Math.ceil(now.getDate() / 7);
-
-      loadSchools();
+  // 預設資料結構
+  let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+    schools: {
+      'OO學校': { course: '', teacher: '', students: [], attendance: {} }
     }
+  };
 
-    function updateTitle() {
-      const school = schoolSelect.value || '未命名學校';
-      titleSchool.textContent = school;
-      const course = localStorage.getItem(`course_${school}`) || '(課程)';
-      titleCourse.textContent = course ? `(${course})` : '(課程)';
-      document.getElementById("currentCourse").textContent = course;
+  // 目前選擇學校
+  let currentSchool = 'OO學校';
+
+  // 年、月、週預設
+  let currentYear = null;
+  let currentMonth = null;
+  let currentWeek = null;
+
+  // 元件參考
+  const titleSchool = document.getElementById('titleSchool');
+  const titleCourse = document.getElementById('titleCourse');
+  const titleTeacher = document.getElementById('titleTeacher');
+  const schoolSelect = document.getElementById('schoolSelect');
+  const btnAddSchool = document.getElementById('btnAddSchool');
+  const btnDelSchool = document.getElementById('btnDelSchool');
+  const courseInput = document.getElementById('courseInput');
+  const btnSetCourse = document.getElementById('btnSetCourse');
+  const teacherInput = document.getElementById('teacherInput');
+  const btnSetTeacher = document.getElementById('btnSetTeacher');
+  const yearSelect = document.getElementById('yearSelect');
+  const monthSelect = document.getElementById('monthSelect');
+  const weekSelect = document.getElementById('weekSelect');
+  const studentInput = document.getElementById('studentInput');
+  const btnAddStudent = document.getElementById('btnAddStudent');
+  const studentCount = document.getElementById('studentCount');
+  const tableBody = document.getElementById('tableBody');
+
+  // 儲存資料
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  // 取得當前學校資料
+  function getCurrentSchoolData() {
+    return data.schools[currentSchool];
+  }
+
+  // 更新學校下拉選單
+  function refreshSchoolOptions() {
+    schoolSelect.innerHTML = '';
+    Object.keys(data.schools).forEach(school => {
+      const opt = document.createElement('option');
+      opt.value = school;
+      opt.textContent = school;
+      schoolSelect.appendChild(opt);
+    });
+    if (!data.schools[currentSchool]) {
+      currentSchool = Object.keys(data.schools)[0];
     }
+    schoolSelect.value = currentSchool;
+  }
 
-    function addSchool() {
-      const name = prompt("請輸入學校名稱");
-      if (!name) return;
-      const schools = JSON.parse(localStorage.getItem("schools") || "[]");
-      if (!schools.includes(name)) {
-        schools.push(name);
-        localStorage.setItem("schools", JSON.stringify(schools));
-        loadSchools(name);
-      }
+  // 新增學校
+  btnAddSchool.onclick = () => {
+    const newSchool = prompt('請輸入新學校名稱');
+    if (!newSchool) return alert('學校名稱不可為空！');
+    if (data.schools[newSchool]) return alert('該學校名稱已存在！');
+    data.schools[newSchool] = { course: '', teacher: '', students: [], attendance: {} };
+    currentSchool = newSchool;
+    saveData();
+    refreshSchoolOptions();
+    renderTable();
+  };
+
+  // 刪除學校
+  btnDelSchool.onclick = () => {
+    if (currentSchool === 'OO學校') return alert('無法刪除預設學校 OO學校');
+    if (!confirm(`確定要刪除學校：${currentSchool}？此動作無法復原。`)) return;
+    delete data.schools[currentSchool];
+    const schools = Object.keys(data.schools);
+    currentSchool = schools.length ? schools[0] : 'OO學校';
+    if (!data.schools[currentSchool]) {
+      data.schools[currentSchool] = { course: '', teacher: '', students: [], attendance: {} };
     }
+    saveData();
+    refreshSchoolOptions();
+    renderTable();
+  };
 
-    function deleteSchool() {
-      const name = schoolSelect.value;
-      if (!name || !confirm(`刪除 ${name}？`)) return;
-      let schools = JSON.parse(localStorage.getItem("schools") || "[]");
-      schools = schools.filter(s => s !== name);
-      localStorage.setItem("schools", JSON.stringify(schools));
-      localStorage.removeItem(`course_${name}`);
-      localStorage.removeItem(`students_${name}`);
-      localStorage.removeItem(`records_${name}`);
-      loadSchools();
+  // 設定課程
+  btnSetCourse.onclick = () => {
+    const val = courseInput.value.trim();
+    if (!val) return alert('課程名稱不可為空！');
+    data.schools[currentSchool].course = val;
+    saveData();
+    renderTable();
+  };
+
+  // 設定指導老師
+  btnSetTeacher.onclick = () => {
+    const val = teacherInput.value.trim();
+    if (!val) return alert('指導老師姓名不可為空！');
+    data.schools[currentSchool].teacher = val;
+    saveData();
+    renderTable();
+  };
+
+  // 切換學校事件
+  schoolSelect.onchange = () => {
+    currentSchool = schoolSelect.value;
+    renderTable();
+  };
+
+  // 新增學生
+  btnAddStudent.onclick = () => {
+    const val = studentInput.value.trim();
+    if (!val) return alert('學生姓名不可為空！');
+    const schoolData = getCurrentSchoolData();
+    if (schoolData.students.includes(val)) {
+      alert('學生姓名已存在！');
+      return;
     }
+    schoolData.students.push(val);
+    saveData();
+    studentInput.value = '';
+    renderTable();
+  };
 
-    function setCourse() {
-      const name = schoolSelect.value;
-      const course = document.getElementById("courseInput").value.trim();
-      if (!name || !course) return;
-      localStorage.setItem(`course_${name}`, course);
-      updateTitle();
-    }
-
-    function addStudent() {
-      const name = document.getElementById("studentInput").value.trim();
-      const school = schoolSelect.value;
-      if (!name || !school) return;
-      const key = `students_${school}`;
-      const students = JSON.parse(localStorage.getItem(key) || "[]");
-      if (!students.includes(name)) {
-        students.push(name);
-        localStorage.setItem(key, JSON.stringify(students));
-        loadData();
-      }
-    }
-
-    function loadSchools(selectName) {
-      schoolSelect.innerHTML = "";
-      const schools = JSON.parse(localStorage.getItem("schools") || "[]");
-      schools.forEach(name => {
-        const opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = name;
-        schoolSelect.appendChild(opt);
-      });
-      if (selectName) schoolSelect.value = selectName;
-      updateTitle();
-      loadData();
-    }
-
-    function loadData() {
-      const school = schoolSelect.value;
-      const students = JSON.parse(localStorage.getItem(`students_${school}`) || "[]");
-      const key = `${yearSelect.value}-${monthSelect.value}-W${weekSelect.value}`;
-      const recordKey = `records_${school}_${key}`;
-      const records = JSON.parse(localStorage.getItem(recordKey) || "{}");
-
-      document.getElementById("studentCount").textContent = `👥 共 ${students.length} 位學生`;
-
-      const today = new Date(`${yearSelect.value}-${monthSelect.value}-01`);
-      const baseDate = new Date(today.setDate((weekSelect.value - 1) * 7 + 1));
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(baseDate);
-        d.setDate(baseDate.getDate() + i);
-        document.getElementById("d" + (i + 1)).textContent = `${d.getMonth() + 1}/${d.getDate()}`;
-      }
-
-      tableBody.innerHTML = "";
-      students.forEach(name => {
-        const tr = document.createElement("tr");
-        const tdName = document.createElement("td");
-        tdName.textContent = name;
-        tr.appendChild(tdName);
-
-        for (let i = 0; i < 7; i++) {
-          const td = document.createElement("td");
-          td.className = "day-cell";
-          td.textContent = records[name]?.[i] ? "✔" : "";
-          if (records[name]?.[i]) td.classList.add("signed");
-          td.onclick = () => {
-            if (!records[name]) records[name] = [false, false, false, false, false, false, false];
-            records[name][i] = !records[name][i];
-            localStorage.setItem(recordKey, JSON.stringify(records));
-            loadData();
-          };
-          tr.appendChild(td);
+  // 刪除學生
+  function deleteStudent(name) {
+    if (!confirm(`確定刪除學生：${name}？此動作無法復原。`)) return;
+    const schoolData = getCurrentSchoolData();
+    schoolData.students = schoolData.students.filter(s => s !== name);
+    // 同時刪除該學生所有點名紀錄
+    if (schoolData.attendance) {
+      Object.keys(schoolData.attendance).forEach(weekKey => {
+        if (schoolData.attendance[weekKey]) {
+          delete schoolData.attendance[weekKey][name];
         }
-
-        const tdDel = document.createElement("td");
-        const btn = document.createElement("button");
-        btn.textContent = "刪除";
-        btn.className = "danger";
-        btn.onclick = () => {
-          if (confirm("確認刪除學生：" + name + "？")) {
-            const updated = students.filter(n => n !== name);
-            localStorage.setItem(`students_${school}`, JSON.stringify(updated));
-            delete records[name];
-            localStorage.setItem(recordKey, JSON.stringify(records));
-            loadData();
-          }
-        };
-        tdDel.appendChild(btn);
-        tr.appendChild(tdDel);
-
-        tableBody.appendChild(tr);
       });
     }
+    saveData();
+    renderTable();
+  }
 
-    yearSelect.addEventListener("change", loadData);
-    monthSelect.addEventListener("change", loadData);
-    weekSelect.addEventListener("change", loadData);
+  // 產生年份選項 (當前年份起 5年)
+  function fillYearOptions() {
+    const nowYear = new Date().getFullYear();
+    yearSelect.innerHTML = '';
+    for (let y = nowYear; y <= nowYear + 5; y++) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+  }
 
-    window.onload = init;
-  </script>
+  // 產生月份選項 (1~12月)
+  function fillMonthOptions() {
+    monthSelect.innerHTML = '';
+    for (let m = 1; m <= 12; m++) {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      monthSelect.appendChild(opt);
+    }
+  }
+
+  // 產生週次選項 1~5週
+  function fillWeekOptions() {
+    weekSelect.innerHTML = '';
+    for (let w = 1; w <= 5; w++) {
+      const opt = document.createElement('option');
+      opt.value = w;
+      opt.textContent = `第 ${w} 週`;
+      weekSelect.appendChild(opt);
+    }
+  }
+
+  // 取得指定年份月份的當週日期（週一～週日）
+  function getWeekDates(year, month, week) {
+    // 取得該月份第一天日期物件
+    const firstDay = new Date(year, month - 1, 1);
+    // 取得該月份第一天是星期幾 (0-6，周日=0)
+    const firstDayWeekday = firstDay.getDay() === 0 ? 7 : firstDay.getDay();
+    // 計算週一的日期，(week - 1) * 7 + (1 - firstDayWeekday) + 1
+    const mondayDate = 1 + (week - 1) * 7 - (firstDayWeekday - 1);
+    let dates = [];
+    for (let i = 0; i < 7; i++) {
+      let d = new Date(year, month - 1, mondayDate + i);
+      dates.push(d);
+    }
+    return dates;
+  }
+
+  // 更新日期標題
+  function updateDateHeaders() {
+    if (!currentYear || !currentMonth || !currentWeek) return;
+    const dates = getWeekDates(currentYear, currentMonth, currentWeek);
+    for (let i = 1; i <= 7; i++) {
+      const d = dates[i - 1];
+      const daySpan = document.getElementById('d' + i);
+      if (d.getMonth() + 1 !== currentMonth) {
+        daySpan.textContent = '-';
+      } else {
+        daySpan.textContent = d.getDate();
+      }
+    }
+  }
+
+  // 點名格點擊切換簽到狀態
+  function toggleAttendance(student, dayIndex) {
+    const schoolData = getCurrentSchoolData();
+    if (!schoolData.attendance[currentWeek]) {
+      schoolData.attendance[currentWeek] = {};
+    }
+    if (!schoolData.attendance[currentWeek][student]) {
+      schoolData.attendance[currentWeek][student] = {};
+    }
+    const currentStatus = schoolData.attendance[currentWeek][student][dayIndex];
+    schoolData.attendance[currentWeek][student][dayIndex] = !currentStatus;
+    saveData();
+    renderTable();
+  }
+
+  // 渲染點名表
+  function renderTable() {
+    if (!data.schools[currentSchool]) return;
+
+    const schoolData = getCurrentSchoolData();
+
+    titleSchool.textContent = currentSchool;
+    titleCourse.textContent = schoolData.course ? `(${schoolData.course})` : '(課程)';
+    titleTeacher.textContent = schoolData.teacher ? `（指導老師：${schoolData.teacher}）` : '(指導老師)';
+
+    courseInput.value = schoolData.course || '';
+    teacherInput.value = schoolData.teacher || '';
+
+    studentCount.textContent = `👥 共 ${schoolData.students.length} 位學生`;
+
+    // 年月週設定選擇初始值
+    if (!currentYear || !yearSelect.querySelector(`option[value="${currentYear}"]`)) {
+      currentYear = new Date().getFullYear();
+    }
+    if (!currentMonth || !monthSelect.querySelector(`option[value="${currentMonth}"]`)) {
+      currentMonth = new Date().getMonth() + 1;
+    }
+    if (!currentWeek || !weekSelect.querySelector(`option[value="${currentWeek}"]`)) {
+      currentWeek = 1;
+    }
+
+    yearSelect.value = currentYear;
+    monthSelect.value = currentMonth;
+    weekSelect.value = currentWeek;
+
+    updateDateHeaders();
+
+    // 產生表格內容
+    tableBody.innerHTML = '';
+    for (let student of schoolData.students) {
+      const tr = document.createElement('tr');
+
+      // 學生姓名(固定欄)
+      const tdName = document.createElement('td');
+      tdName.textContent = student;
+      tdName.className = 'sticky-name';
+      tr.appendChild(tdName);
+
+      // 7天簽到欄位
+      for (let day = 1; day <= 7; day++) {
+        const td = document.createElement('td');
+        td.className = 'day-cell';
+        td.dataset.student = student;
+        td.dataset.day = day;
+        // 簽到狀態
+        const signed = schoolData.attendance[currentWeek]
+          && schoolData.attendance[currentWeek][student]
+          && schoolData.attendance[currentWeek][student][day];
+        if (signed) {
+          td.classList.add('signed');
+          td.textContent = '✔';
+        } else {
+          td.textContent = '';
+        }
+        td.onclick = () => toggleAttendance(student, day);
+        tr.appendChild(td);
+      }
+
+      // 刪除學生按鈕
+      const tdDel = document.createElement('td');
+      tdDel.className = 'delete-cell';
+      const btnDel = document.createElement('button');
+      btnDel.textContent = '刪除';
+      btnDel.onclick = () => deleteStudent(student);
+      tdDel.appendChild(btnDel);
+      tr.appendChild(tdDel);
+
+      tableBody.appendChild(tr);
+    }
+  }
+
+  // 監聽年月週下拉改變事件
+  yearSelect.onchange = () => {
+    currentYear = parseInt(yearSelect.value);
+    renderTable();
+  };
+  monthSelect.onchange = () => {
+    currentMonth = parseInt(monthSelect.value);
+    renderTable();
+  };
+  weekSelect.onchange = () => {
+    currentWeek = parseInt(weekSelect.value);
+    renderTable();
+  };
+
+  // 初始化函式
+  function init() {
+    refreshSchoolOptions();
+    fillYearOptions();
+    fillMonthOptions();
+    fillWeekOptions();
+
+    // 預設為當前日期年、月、週
+    const today = new Date();
+    currentYear = today.getFullYear();
+    currentMonth = today.getMonth() + 1;
+    currentWeek = 1; // 預設週一開始，使用者可選擇後調整
+
+    renderTable();
+  }
+
+  init();
+
+</script>
 </body>
 </html>
