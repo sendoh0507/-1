@@ -26,7 +26,6 @@
     margin: 0 0 8px 0;
     font-size: 20px;
     color: #fff;
-    line-height: 1.2;
     user-select: none;
   }
   .top-panel {
@@ -125,9 +124,18 @@
   td.delete-cell button:hover {
     background: #c12e2a;
   }
+
   @media (max-width: 480px) {
     .top-panel {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    #yearSelect, #monthSelect, #weekSelect {
+      font-size: 14px;
+      padding: 4px;
+    }
+    #studentInput {
+      font-size: 12px;
+      padding: 4px;
     }
     td.day-cell {
       width: 24px;
@@ -137,53 +145,50 @@
       width: 70px;
       max-width: 70px;
     }
-    #studentInput {
-      font-size: 12px;
-    }
   }
 </style>
 </head>
 <body>
-  <div class="container">
-    <h2 id="titleHeader">📚 OO學校 (課程) 點名版 📚</h2>
+<div class="container">
+  <h2 id="titleHeader">📚 OO學校 (課程) 點名版 📚</h2>
 
-    <div class="top-panel">
-      <select id="schoolSelect"></select>
-      <button id="btnAddSchool">新增學校</button>
-      <button id="btnDelSchool">刪除學校</button>
-      <input id="courseInput" type="text" placeholder="課程名稱" />
-      <button id="btnSetCourse">設定課程</button>
-      <input id="teacherInput" type="text" placeholder="老師" />
-    </div>
-
-    <div class="top-panel">
-      <select id="yearSelect"></select>
-      <select id="monthSelect"></select>
-      <select id="weekSelect"></select>
-      <input id="studentInput" type="text" placeholder="新增學生" />
-      <button id="btnAddStudent">新增</button>
-      <div id="studentCount">👥 共 0 位學生</div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>學生姓名</th>
-            <th id="d1">一<br>-</th>
-            <th id="d2">二<br>-</th>
-            <th id="d3">三<br>-</th>
-            <th id="d4">四<br>-</th>
-            <th id="d5">五<br>-</th>
-            <th id="d6">六<br>-</th>
-            <th id="d7">日<br>-</th>
-            <th>刪除</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
+  <div class="top-panel">
+    <select id="schoolSelect"></select>
+    <button id="btnAddSchool">新增學校</button>
+    <button id="btnDelSchool">刪除學校</button>
+    <input id="courseInput" type="text" placeholder="課程名稱" />
+    <button id="btnSetCourse">設定課程</button>
+    <input id="teacherInput" type="text" placeholder="老師" />
   </div>
+
+  <div class="top-panel">
+    <select id="yearSelect"></select>
+    <select id="monthSelect"></select>
+    <select id="weekSelect"></select>
+    <input id="studentInput" type="text" placeholder="新增學生" />
+    <button id="btnAddStudent">新增</button>
+    <div id="studentCount">👥 共 0 位學生</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>學生姓名</th>
+          <th id="d1">一<br>-</th>
+          <th id="d2">二<br>-</th>
+          <th id="d3">三<br>-</th>
+          <th id="d4">四<br>-</th>
+          <th id="d5">五<br>-</th>
+          <th id="d6">六<br>-</th>
+          <th id="d7">日<br>-</th>
+          <th>刪除</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
 
 <script>
 const STORAGE_KEY = "attendanceData";
@@ -216,13 +221,14 @@ function initDatePanels() {
   const y = now.getFullYear();
   const m = now.getMonth() + 1;
 
-  for(let i=y; i<=y+5; i++) yearSelect.innerHTML += `<option value="${i}">${i} 年</option>`;
+  for(let i=y; i<=y+5; i++) yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
   for(let i=1;i<=12;i++){
     const v=i.toString().padStart(2,'0');
-    monthSelect.innerHTML += `<option value="${v}">${i} 月</option>`;
+    monthSelect.innerHTML += `<option value="${v}">${v}</option>`;
   }
   for(let i=1;i<=5;i++){
-    weekSelect.innerHTML += `<option value="${i}">第 ${i} 週</option>`;
+    const label = ["一","二","三","四","五"][i-1];
+    weekSelect.innerHTML += `<option value="${i}">${label}</option>`;
   }
 
   yearSelect.value = y;
