@@ -31,14 +31,6 @@
       gap: 10px;
       margin-bottom: 10px;
     }
-    .sub-controls {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
     .student-controls {
       display: flex;
       flex-wrap: wrap;
@@ -108,13 +100,14 @@
   <div class="container">
     <h1>📚 <span id="titleSchool">OO學校</span> <span id="titleCourse">(課程)</span> 點名版 📚</h1>
     <div class="controls">
-      <select id="schoolSelect" onchange="updateTitle()"></select>
+      <select id="schoolSelect" onchange="updateTitle(); loadData();"></select>
       <button onclick="addSchool()">新增學校</button>
       <button onclick="deleteSchool()" class="danger">刪除學校</button>
       <input type="text" id="courseInput" placeholder="請輸入課程名稱">
       <button onclick="setCourse()">設定課程</button>
       <select id="yearSelect"></select>
       <select id="monthSelect"></select>
+      <select id="weekSelect"></select>
     </div>
     <div class="student-controls">
       <input type="text" id="studentInput" placeholder="輸入新學生">
@@ -140,12 +133,173 @@
     </table>
   </div>
   <script>
-    function updateTitle() {
-      const school = document.getElementById('schoolSelect').value || '未命名學校';
-      document.getElementById('titleSchool').textContent = school;
-      const course = localStorage.getItem(`course_${school}`) || '(課程)';
-      document.getElementById('titleCourse').textContent = course ? `(${course})` : '(課程)';
+    const schoolSelect = document.getElementById('schoolSelect');
+    const titleSchool = document.getElementById('titleSchool');
+    const titleCourse = document.getElementById('titleCourse');
+    const yearSelect = document.getElementById('yearSelect');
+    const monthSelect = document.getElementById('monthSelect');
+    const weekSelect = document.getElementById('weekSelect');
+    const tableBody = document.getElementById('tableBody');
+
+    function init() {
+      // 初始化下拉選單
+      const now = new Date();
+      for (let y = now.getFullYear(); y <= now.getFullYear() + 5; y++) {
+        const opt = document.createElement("option");
+        opt.value = y;
+        opt.text = y + " 年";
+        yearSelect.appendChild(opt);
+      }
+      yearSelect.value = now.getFullYear();
+
+      for (let i = 1; i <= 12; i++) {
+        const opt = document.createElement("option");
+        opt.value = String(i).padStart(2, "0");
+        opt.text = i + " 月";
+        monthSelect.appendChild(opt);
+      }
+      monthSelect.value = String(now.getMonth() + 1).padStart(2, "0");
+
+      for (let i = 1; i <= 5; i++) {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.text = "第 " + i + " 週";
+        weekSelect.appendChild(opt);
+      }
+      weekSelect.value = Math.ceil(now.getDate() / 7);
+
+      loadSchools();
     }
+
+    function updateTitle() {
+      const school = schoolSelect.value || '未命名學校';
+      titleSchool.textContent = school;
+      const course = localStorage.getItem(`course_${school}`) || '(課程)';
+      titleCourse.textContent = course ? `(${course})` : '(課程)';
+      document.getElementById("currentCourse").textContent = course;
+    }
+
+    function addSchool() {
+      const name = prompt("請輸入學校名稱");
+      if (!name) return;
+      const schools = JSON.parse(localStorage.getItem("schools") || "[]");
+      if (!schools.includes(name)) {
+        schools.push(name);
+        localStorage.setItem("schools", JSON.stringify(schools));
+        loadSchools(name);
+      }
+    }
+
+    function deleteSchool() {
+      const name = schoolSelect.value;
+      if (!name || !confirm(`刪除 ${name}？`)) return;
+      let schools = JSON.parse(localStorage.getItem("schools") || "[]");
+      schools = schools.filter(s => s !== name);
+      localStorage.setItem("schools", JSON.stringify(schools));
+      localStorage.removeItem(`course_${name}`);
+      localStorage.removeItem(`students_${name}`);
+      localStorage.removeItem(`records_${name}`);
+      loadSchools();
+    }
+
+    function setCourse() {
+      const name = schoolSelect.value;
+      const course = document.getElementById("courseInput").value.trim();
+      if (!name || !course) return;
+      localStorage.setItem(`course_${name}`, course);
+      updateTitle();
+    }
+
+    function addStudent() {
+      const name = document.getElementById("studentInput").value.trim();
+      const school = schoolSelect.value;
+      if (!name || !school) return;
+      const key = `students_${school}`;
+      const students = JSON.parse(localStorage.getItem(key) || "[]");
+      if (!students.includes(name)) {
+        students.push(name);
+        localStorage.setItem(key, JSON.stringify(students));
+        loadData();
+      }
+    }
+
+    function loadSchools(selectName) {
+      schoolSelect.innerHTML = "";
+      const schools = JSON.parse(localStorage.getItem("schools") || "[]");
+      schools.forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        schoolSelect.appendChild(opt);
+      });
+      if (selectName) schoolSelect.value = selectName;
+      updateTitle();
+      loadData();
+    }
+
+    function loadData() {
+      const school = schoolSelect.value;
+      const students = JSON.parse(localStorage.getItem(`students_${school}`) || "[]");
+      const key = `${yearSelect.value}-${monthSelect.value}-W${weekSelect.value}`;
+      const recordKey = `records_${school}_${key}`;
+      const records = JSON.parse(localStorage.getItem(recordKey) || "{}");
+
+      document.getElementById("studentCount").textContent = `👥 共 ${students.length} 位學生`;
+
+      const today = new Date(`${yearSelect.value}-${monthSelect.value}-01`);
+      const baseDate = new Date(today.setDate((weekSelect.value - 1) * 7 + 1));
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(baseDate);
+        d.setDate(baseDate.getDate() + i);
+        document.getElementById("d" + (i + 1)).textContent = `${d.getMonth() + 1}/${d.getDate()}`;
+      }
+
+      tableBody.innerHTML = "";
+      students.forEach(name => {
+        const tr = document.createElement("tr");
+        const tdName = document.createElement("td");
+        tdName.textContent = name;
+        tr.appendChild(tdName);
+
+        for (let i = 0; i < 7; i++) {
+          const td = document.createElement("td");
+          td.className = "day-cell";
+          td.textContent = records[name]?.[i] ? "✔" : "";
+          if (records[name]?.[i]) td.classList.add("signed");
+          td.onclick = () => {
+            if (!records[name]) records[name] = [false, false, false, false, false, false, false];
+            records[name][i] = !records[name][i];
+            localStorage.setItem(recordKey, JSON.stringify(records));
+            loadData();
+          };
+          tr.appendChild(td);
+        }
+
+        const tdDel = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.textContent = "刪除";
+        btn.className = "danger";
+        btn.onclick = () => {
+          if (confirm("確認刪除學生：" + name + "？")) {
+            const updated = students.filter(n => n !== name);
+            localStorage.setItem(`students_${school}`, JSON.stringify(updated));
+            delete records[name];
+            localStorage.setItem(recordKey, JSON.stringify(records));
+            loadData();
+          }
+        };
+        tdDel.appendChild(btn);
+        tr.appendChild(tdDel);
+
+        tableBody.appendChild(tr);
+      });
+    }
+
+    yearSelect.addEventListener("change", loadData);
+    monthSelect.addEventListener("change", loadData);
+    weekSelect.addEventListener("change", loadData);
+
+    window.onload = init;
   </script>
 </body>
 </html>
