@@ -126,16 +126,31 @@
   }
 
   @media (max-width: 480px) {
-    .top-panel {
-      grid-template-columns: 1fr 1fr 1fr;
+    /* 調整第二排 top-panel 欄位寬度 */
+    .top-panel:nth-of-type(2) {
+      /* 年/月/週約100px，新學生約50px，新增按鈕和人數區域自適應 */
+      grid-template-columns: 100px 100px 100px 50px 1fr auto;
+      gap: 4px;
     }
+    /* 同時調整這些欄位字型與內距 */
     #yearSelect, #monthSelect, #weekSelect {
       font-size: 14px;
       padding: 4px;
+      text-align: center;
     }
     #studentInput {
       font-size: 12px;
       padding: 4px;
+      text-align: center;
+    }
+    #btnAddStudent {
+      font-size: 13px;
+      padding: 6px 4px;
+    }
+    #studentCount {
+      font-size: 13px;
+      white-space: nowrap;
+      padding-left: 4px;
     }
     td.day-cell {
       width: 24px;
