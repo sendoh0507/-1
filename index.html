@@ -37,8 +37,9 @@
   }
   /* 第二排 top-panel: 調整欄位寬度 */
   .top-panel.bottom {
-    grid-template-columns: 73px 73px 73px 40px 1fr auto;
+    grid-template-columns: 70px 70px 70px 40px 1fr auto;
     gap: 4px;
+    margin-bottom: 6px;
   }
 
   .top-panel input,
@@ -53,7 +54,7 @@
     color: #fff;
     text-align: center;
   }
-  /* input 和 select 寬度100%由 grid 容器控制 */
+  /* input 和 select 寬度改成 100% 讓 grid 寬度控制 */
   .top-panel input,
   .top-panel select {
     width: 100%;
@@ -145,7 +146,9 @@
       margin-bottom: 6px;
     }
     .top-panel.bottom {
-      grid-template-columns: 73px 73px 73px 40px 1fr auto;
+      grid-template-columns: 70px 70px 70px 40px 1fr auto;
+      gap: 4px;
+      margin-bottom: 6px;
     }
     #yearSelect, #monthSelect, #weekSelect {
       font-size: 14px;
@@ -226,6 +229,7 @@ const studentCount = document.getElementById("studentCount");
 const tableBody = document.getElementById("tableBody");
 const titleHeader = document.getElementById("titleHeader");
 
+// 讀取本地資料或初始化
 let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
   schools: { "OO學校": { course:"課程", teacher:"", students:[], attendance:{} } },
   currentSchool: "OO學校"
@@ -260,6 +264,7 @@ function initDatePanels() {
   yearSelect.value = y;
   monthSelect.value = m.toString().padStart(2, "0");
 
+  // 計算當週(星期一起算)
   const firstDay = new Date(y, m - 1, 1).getDay();
   const offset = firstDay === 0 ? 6 : firstDay - 1;
   const currentWeek = Math.min(5, Math.floor((now.getDate() + offset - 1) / 7) + 1);
@@ -267,8 +272,10 @@ function initDatePanels() {
 }
 
 function refreshUI() {
+  // 載入學校列表
   schoolSelect.innerHTML = Object.keys(data.schools).map(school => `<option value="${school}">${school}</option>`).join("");
   schoolSelect.value = data.currentSchool;
+
   const info = data.schools[data.currentSchool];
   courseInput.value = info.course || "";
   teacherInput.value = info.teacher ? info.teacher.replace(/老師$/, "") : "";
@@ -281,7 +288,7 @@ function getWeekDates(y, m, w) {
   const startDate = 1 + (w - 1) * 7 - offset;
   const daysInMonth = new Date(y, m, 0).getDate();
   let dates = [];
-  for (let i = 0; i < 7; i++) {
+  for(let i = 0; i < 7; i++) {
     const d = startDate + i;
     dates.push(d < 1 || d > daysInMonth ? "-" : d);
   }
@@ -295,8 +302,8 @@ function renderTable() {
   const w = +weekSelect.value;
   const dates = getWeekDates(y, m, w);
 
-  for(let i=1; i<=7; i++){
-    document.getElementById("d"+i).innerHTML = ["一","二","三","四","五","六","日"][i-1] + "<br>" + dates[i-1];
+  for(let i = 1; i <= 7; i++) {
+    document.getElementById("d" + i).innerHTML = ["一","二","三","四","五","六","日"][i-1] + "<br>" + dates[i-1];
   }
 
   const key = `${yearSelect.value}-${monthSelect.value}-${weekSelect.value}`;
@@ -324,9 +331,9 @@ function renderTable() {
     });
 
     tr.querySelector("button").onclick = () => {
-      if (confirm(`刪除學生：${name}?`)) {
+      if(confirm(`刪除學生：${name}?`)) {
         info.students = info.students.filter(n => n !== name);
-        for (const k in info.attendance) {
+        for(const k in info.attendance) {
           delete info.attendance[k][name];
         }
         saveData();
@@ -343,7 +350,7 @@ function renderTable() {
 // 新增學校
 btnAddSchool.onclick = () => {
   const n = prompt("新學校名稱:");
-  if (n && !data.schools[n]) {
+  if(n && !data.schools[n]){
     data.schools[n] = { course: "課程", teacher: "", students: [], attendance: {} };
     data.currentSchool = n;
     saveData();
@@ -354,7 +361,7 @@ btnAddSchool.onclick = () => {
 
 // 刪除學校
 btnDelSchool.onclick = () => {
-  if (data.currentSchool !== "OO學校" && confirm(`刪除學校「${data.currentSchool}」?`)) {
+  if(data.currentSchool !== "OO學校" && confirm(`刪除學校「${data.currentSchool}」?`)){
     delete data.schools[data.currentSchool];
     data.currentSchool = Object.keys(data.schools)[0];
     saveData();
@@ -363,17 +370,17 @@ btnDelSchool.onclick = () => {
   }
 };
 
-// 設定課程及老師
+// 設定課程與老師（老師欄位自動加上「老師」字尾）
 btnSetCourse.onclick = () => {
   const info = data.schools[data.currentSchool];
-  info.course = courseInput.value;
+  info.course = courseInput.value.trim();
   info.teacher = teacherInput.value.trim() + "老師";
   saveData();
   refreshUI();
   alert("設定完成");
 };
 
-// 切換學校時更新畫面及資料
+// 切換學校時載入對應資料
 schoolSelect.onchange = () => {
   data.currentSchool = schoolSelect.value;
   saveData();
@@ -381,7 +388,7 @@ schoolSelect.onchange = () => {
   renderTable();
 };
 
-// 老師輸入即時保存
+// 老師欄位即時輸入時自動保存並加「老師」
 teacherInput.addEventListener("input", () => {
   const info = data.schools[data.currentSchool];
   info.teacher = teacherInput.value.trim() + "老師";
@@ -391,9 +398,9 @@ teacherInput.addEventListener("input", () => {
 // 新增學生
 btnAddStudent.onclick = () => {
   const v = studentInput.value.trim();
-  if (v) {
+  if(v){
     const s = data.schools[data.currentSchool].students;
-    if (!s.includes(v)) {
+    if(!s.includes(v)){
       s.push(v);
       saveData();
       renderTable();
@@ -407,6 +414,7 @@ btnAddStudent.onclick = () => {
 // 年/月/週改變重繪表格
 yearSelect.onchange = monthSelect.onchange = weekSelect.onchange = renderTable;
 
+// 初始化
 initDatePanels();
 refreshUI();
 renderTable();
