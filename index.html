@@ -6,213 +6,146 @@
   <title>📚 OO學校 點名版 📚</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0; padding: 0;
-      background: #2e2e2e; color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url('https://i.imgur.com/N4gA9kR.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
     }
     .container {
-      max-width: 1200px; margin: auto; padding: 20px;
-      background: rgba(0,0,0,0.7); border-radius: 12px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
     }
-    h1 { text-align: center; margin-bottom: 20px; }
-    .controls, .student-controls {
-      display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .sub-controls {
+      display: flex;
+      justify-content: flex-start;
       align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
-    select, input, button {
-      padding: 8px; font-size: 16px; border-radius: 6px; border: none;
+    .student-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 20px;
     }
-    select, input { background: #1e1e1e; color: #fff; }
-    button { background: #4caf50; color: #fff; cursor: pointer; }
-    button.danger { background: #f44336; }
+    input, select, button {
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+    }
+    select, input {
+      background: #1e1e1e;
+      color: #fff;
+    }
+    button {
+      background: #4caf50;
+      color: #fff;
+      cursor: pointer;
+    }
+    button.danger {
+      background: #f44336;
+    }
     table {
-      width: 100%; border-collapse: collapse; overflow-x: auto;
+      width: 100%;
+      border-collapse: collapse;
+      overflow-x: auto;
+    }
+    th, td {
+      border: 1px solid #555;
+      padding: 8px;
+      text-align: center;
+      min-width: 80px;
+    }
+    th {
       background: #2a2d2e;
     }
-    th, td { border: 1px solid #555; padding: 8px; text-align: center; min-width: 80px; }
-    th.sticky-col, td.sticky-col {
-      position: sticky; left: 0; background: #2a2d2e; z-index: 1;
+    td.day-cell {
+      cursor: pointer;
+      background: #424242;
     }
-    td.day-cell { cursor: pointer; background: #424242; }
-    td.day-cell.signed { background: #81c784; font-weight: bold; color: #000; }
+    td.day-cell.signed {
+      background: #81c784;
+      font-weight: bold;
+      color: #000;
+    }
     @media (max-width: 768px) {
-      .controls, .student-controls { flex-direction: column; align-items: flex-start; }
-      table { display: block; overflow-x: auto; }
+      .controls {
+        display: flex;
+        flex-direction: column;
+      }
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+      .student-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>📚 <span id="titleSchool">OO學校</span> <span id="titleCourse">(課程)</span> 點名版 📚</h1>
-
-  <div class="controls">
-    <select id="schoolSelect" style="min-width:150px;"></select>
-    <button onclick="addSchool()">新增學校</button>
-    <button onclick="deleteSchool()" class="danger">刪除學校</button>
-    <input type="text" id="courseInput" placeholder="請輸入課程名稱" style="min-width:150px;">
-    <button onclick="setCourse()">設定課程</button>
-    <select id="yearSelect" style="min-width:90px;"></select>
-    <select id="monthSelect" style="min-width:90px;"></select>
-    <select id="weekSelect" style="min-width:90px;"></select>
+  <div class="container">
+    <h1>📚 <span id="titleSchool">OO學校</span> <span id="titleCourse">(課程)</span> 點名版 📚</h1>
+    <div class="controls">
+      <select id="schoolSelect" onchange="updateTitle()"></select>
+      <button onclick="addSchool()">新增學校</button>
+      <button onclick="deleteSchool()" class="danger">刪除學校</button>
+      <input type="text" id="courseInput" placeholder="請輸入課程名稱">
+      <button onclick="setCourse()">設定課程</button>
+      <select id="yearSelect"></select>
+      <select id="monthSelect"></select>
+    </div>
+    <div class="student-controls">
+      <input type="text" id="studentInput" placeholder="輸入新學生">
+      <button onclick="addStudent()">新增學生</button>
+      <div id="courseDisplay">📘 課程：<span id="currentCourse">尚未設定</span></div>
+      <div id="studentCount">👥 共 0 位學生</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>姓名</th>
+          <th class="date-header">週一<br><span id="d1">-</span></th>
+          <th class="date-header">週二<br><span id="d2">-</span></th>
+          <th class="date-header">週三<br><span id="d3">-</span></th>
+          <th class="date-header">週四<br><span id="d4">-</span></th>
+          <th class="date-header">週五<br><span id="d5">-</span></th>
+          <th class="date-header">週六<br><span id="d6">-</span></th>
+          <th class="date-header">週日<br><span id="d7">-</span></th>
+          <th>刪除</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
   </div>
-
-  <div class="student-controls">
-    <input type="text" id="studentInput" placeholder="輸入新學生" style="min-width:150px;">
-    <button onclick="addStudent()">新增學生</button>
-    <div id="courseDisplay">📘 課程：<span id="currentCourse">尚未設定</span></div>
-    <div id="studentCount">👥 共 0 位學生</div>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th class="sticky-col">姓名</th>
-        <th>週一<br><span id="d1">-</span></th>
-        <th>週二<br><span id="d2">-</span></th>
-        <th>週三<br><span id="d3">-</span></th>
-        <th>週四<br><span id="d4">-</span></th>
-        <th>週五<br><span id="d5">-</span></th>
-        <th>週六<br><span id="d6">-</span></th>
-        <th>週日<br><span id="d7">-</span></th>
-        <th>刪除</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-</div>
-
-<script>
-(() => {
-  const schoolSel = document.getElementById('schoolSelect');
-  const yearSel = document.getElementById('yearSelect');
-  const monthSel = document.getElementById('monthSelect');
-  const weekSel = document.getElementById('weekSelect');
-  const studentInput = document.getElementById('studentInput');
-  const tableBody = document.getElementById('tableBody');
-  const titleSchool = document.getElementById('titleSchool');
-  const titleCourse = document.getElementById('titleCourse');
-  const courseInput = document.getElementById('courseInput');
-  const currentCourse = document.getElementById('currentCourse');
-  const studentCount = document.getElementById('studentCount');
-  const days = ['d1','d2','d3','d4','d5','d6','d7'];
-
-  let data = JSON.parse(localStorage.getItem('attendanceData')||'{}');
-  let schools = data.schools||{};
-  let courseMap = data.courseMap||{};
-  let selectedSchool = data.selectedSchool||Object.keys(schools)[0]||'未命名學校';
-
-  function save() {
-    localStorage.setItem('attendanceData', JSON.stringify({schools,courseMap,selectedSchool}));
-  }
-
-  function initDates() {
-    const now = new Date();
-    let yd = now.getFullYear(), md = now.getMonth()+1;
-    yearSel.innerHTML=''; for(let y=yd;y<=yd+5;y++){yearSel.innerHTML+=`<option value="${y}">${y} 年</option>`}
-    yearSel.value=yd;
-    monthSel.innerHTML=''; for(let m=1;m<=12;m++){monthSel.innerHTML+=`<option value="${m}">${m} 月</option>`}
-    monthSel.value=md;
-    weekSel.innerHTML=''; for(let w=1;w<=5;w++){weekSel.innerHTML+=`<option value="${w}">第${w}週</option>`}
-    weekSel.value = getCurrentWeekOfMonth();
-    updateWeekDates();
-  }
-
-  function updateWeekDates() {
-    const y=+yearSel.value, m=+monthSel.value, w=+weekSel.value;
-    const first=new Date(y, m-1,1);
-    const start = new Date(first);
-    start.setDate(1 + (w-1)*7 - ((first.getDay()+6)%7));
-    days.forEach((id,i)=>{
-      const d = new Date(start);
-      d.setDate(start.getDate()+i);
-      document.getElementById(id).textContent = (d.getMonth()+1===m && d.getFullYear()===y)?d.getDate():'-';
-    });
-  }
-
-  function getCurrentWeekOfMonth(){
-    const now=new Date(), y=now.getFullYear(), m=now.getMonth();
-    const day=now.getDate(), firstWeekday=new Date(y,m,1).getDay();
-    return Math.min(5, Math.ceil((day + (firstWeekday===0?6:firstWeekday-1))/7));
-  }
-
-  function renderSchools(){
-    schoolSel.innerHTML = '';
-    Object.keys(schools).forEach(s=>{
-      schoolSel.innerHTML += `<option>${s}</option>`;
-    });
-    schoolSel.value = selectedSchool;
-  }
-
-  function render(){
-    const stus = schools[selectedSchool]||[];
-    studentCount.textContent=`👥 共 ${stus.length} 位學生`;
-    titleSchool.textContent = selectedSchool;
-    currentCourse.textContent = courseMap[selectedSchool]||'尚未設定';
-    courseInput.value = courseMap[selectedSchool]||'';
-    tableBody.innerHTML = '';
-    stus.forEach(name=>{
-      const tr = document.createElement('tr');
-      const tdName = document.createElement('td');
-      tdName.textContent = name;
-      tdName.classList.add('sticky-col');
-      tr.appendChild(tdName);
-      days.forEach((_,i)=>{
-        const td = document.createElement('td');
-        td.classList.add('day-cell');
-        const key = `${selectedSchool}_${yearSel.value}_${monthSel.value}_${weekSel.value}_${name}_${i}`;
-        if(localStorage.getItem(key)=='1') td.classList.add('signed');
-        td.onclick = () => {
-          const val = td.classList.toggle('signed');
-          localStorage.setItem(key, val?1:0);
-        };
-        tr.appendChild(td);
-      });
-      const tdDel=document.createElement('td');
-      const btn=document.createElement('button');
-      btn.textContent='刪除';btn.className='danger';
-      btn.onclick=()=>{
-        if(confirm(`刪除學生 ${name}?`)){
-          schools[selectedSchool] = stus.filter(s=>s!==name); save(); render();
-        }
-      };
-      tdDel.appendChild(btn); tr.appendChild(tdDel);
-      tableBody.appendChild(tr);
-    });
-  }
-
-  // events
-  schoolSel.onchange = ()=>{selectedSchool=schoolSel.value;save();render();}
-  yearSel.onchange = updateWeekDates;
-  monthSel.onchange = ()=>{updateWeekDates(); save(); render();}
-  weekSel.onchange = render;
-  courseInput.onchange = setCourse;
-
-  function addStudent(){
-    const n = studentInput.value.trim();
-    if(!n) return alert('請輸入學生名');
-    schools[selectedSchool] = schools[selectedSchool]||[];
-    if(schools[selectedSchool].includes(n)) return alert('已存在');
-    schools[selectedSchool].push(n); studentInput.value=''; save(); render();
-  }
-  function addSchool(){
-    const n=prompt('學校名'); if(!n) return;
-    if(!schools[n]) schools[n]=[]; selectedSchool=n; save(); renderSchools(); render();
-  }
-  function deleteSchool(){
-    if(!confirm(`刪除學校 ${selectedSchool}?`)) return;
-    delete schools[selectedSchool]; delete courseMap[selectedSchool];
-    selectedSchool = Object.keys(schools)[0]||'未命名學校'; save(); renderSchools(); render();
-  }
-  function setCourse(){
-    const v = courseInput.value.trim();
-    if(v) courseMap[selectedSchool]=v; save(); render();
-  }
-
-  // init
-  initDates();
-  renderSchools();
-  render();
-})();
-</script>
+  <script>
+    function updateTitle() {
+      const school = document.getElementById('schoolSelect').value || '未命名學校';
+      document.getElementById('titleSchool').textContent = school;
+      const course = localStorage.getItem(`course_${school}`) || '(課程)';
+      document.getElementById('titleCourse').textContent = course ? `(${course})` : '(課程)';
+    }
+  </script>
 </body>
 </html>
